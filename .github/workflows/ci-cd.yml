@@ -73,15 +73,14 @@ jobs:
           token: ${{ secrets.GITOPS_PAT }} # Personal Access Token nécessaire pour push
           path: gitops-repo
 
-      - name: Mise à jour du tag de l'image (ArgoCD)
+      - name: Mise à jour du tag de l'image en Staging (ArgoCD)
         run: |
-          cd gitops-repo/gitops/apps/votre-app-dossier
-          # Utilisation de sed pour remplacer l'ancienne version par la nouvelle
-          # On suppose que l'image est définie dans un fichier values.yaml ou deployment.yaml
-          sed -i "s|tag: .*|tag: ${{ github.sha }}|g" values.yaml
+          cd gitops-repo/gitops/apps/mon-app/overlays/staging
+          # Utilisation de sed pour remplacer le tag dans kustomization.yaml
+          sed -i "s|newTag: .*|newTag: \"${{ github.sha }}\"|g" kustomization.yaml
           
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add values.yaml
-          git commit -m "ci: update image tag to ${{ github.sha }}"
+          git add kustomization.yaml
+          git commit -m "ci(staging): update image tag to ${{ github.sha }}"
           git push origin main
