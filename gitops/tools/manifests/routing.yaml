@@ -15,8 +15,7 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "*.example.com"
-    - "*.stag.example.com"
+    - "*" # Accepte n'importe quel host (le routage spécifique se fait dans les VirtualServices)
     tls:
       httpsRedirect: true # Redirection HTTP -> HTTPS
   - port:
@@ -24,11 +23,11 @@ spec:
       name: https
       protocol: HTTPS
     hosts:
-    - "*.example.com"
-    - "*.stag.example.com"
+    - "*"
     tls:
       mode: SIMPLE
-      credentialName: wildcard-tls-cert # Le secret généré par cert-manager
+      credentialName: wildcard-tls-cert # Par défaut, mais on peut avoir plusieurs Gateway/Certs
+
 
 ---
 # -----------------------------------------------------------------------------

@@ -20,8 +20,8 @@ spec:
           name: external-dns
           annotations:
             eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/gitops-eks-cluster-external-dns"
-        domainFilters:
-          - example.com
+        # domainFilters:
+        #  - example.com # Commenté pour permettre le multi-domaines (tous les domaines de la zone Route53)
         policy: sync # permet de créer, mettre à jour et supprimer les records
         resources:
           requests:
