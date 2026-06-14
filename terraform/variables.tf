@@ -27,3 +27,10 @@ variable "domain_name" {
   type        = string
   default     = "example.com"
 }
+
+variable "route53_hosted_zone_id" {
+  description = "ID de la zone HostedZone Route53 (ex: Z1234567890)"
+  type        = string
+  default     = "Z1234567890" # A configurer par l_utilisateur
+}
+

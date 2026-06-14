@@ -94,3 +94,15 @@ Istio, Cert-Manager et ExternalDNS sont configurÃ©s pour Ãªtre agnostiques vis-Ã
 Karpenter est configurÃ© avec deux NodePools (dans `terraform/karpenter.tf`) :
 - `tools-spot` : Utilise exclusivement des instances Spot (ex: t3, m5) pour les outils (CI/CD, Monitoring). Cela rÃ©duit les coÃ»ts de ~70%.
 - `prod-ondemand` : Utilise des instances On-Demand pour vos applications de production critiques.
+
+## ??? Architecture Durcie & Sécurisée (Mise à jour)
+
+1. **Séparation des Dépôts** : Ce dépôt ne contient que l_infrastructure (Terraform). Les manifestes GitOps sont dans `aws-gitops-apps`.
+2. **VPC Multi-NAT** : Une NAT Gateway par zone de disponibilité pour une véritable Haute Disponibilité, et des sous-réseaux `intra` pour isoler vos ressources internes.
+3. **EKS 100% Privé & Bastion** : L_endpoint API public d_EKS est désactivé.
+   - Un **Bastion EC2** avec Wireguard est provisionné. Vous pouvez vous y connecter en SSH ou via Wireguard VPN pour exécuter vos commandes `kubectl`.
+   - Un agent Terraform Cloud (`tfc-agent`) est déployé dans le VPC pour permettre à TFC d_exécuter les modules Helm/Kubernetes de manière sécurisée.
+4. **Vault HA & Auto-Unseal** : Vault fonctionne maintenant en Haute Disponibilité avec le backend Raft. L_auto-unseal est configuré via une clé AWS KMS dédiée, supprimant l_intervention manuelle en cas de redémarrage.
+5. **Sauvegardes (Velero)** : Un bucket S3 dédié et un rôle IRSA permettent à Velero de sauvegarder votre cluster (manifestes et volumes EBS).
+6. **Gouvernance (Kyverno)** : Le moteur de politiques Kyverno est déployé pour s_assurer que seuls les conteneurs sécurisés tournent sur votre infrastructure.
+
