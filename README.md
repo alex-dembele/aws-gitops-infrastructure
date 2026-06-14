@@ -69,7 +69,26 @@ Pour qu'il fonctionne, vous devez ajouter ces secrets dans les paramètres de vo
 *   `SONAR_TOKEN` : Token généré dans SonarQube.
 *   `SONAR_HOST_URL` : URL de votre SonarQube (ex: `https://sonar.stag.example.com`).
 *   `DOCKERHUB_USERNAME` et `DOCKERHUB_TOKEN` : Pour pousser les images.
-*   `GITOPS_PAT` : Un Personal Access Token GitHub permettant à l'Action de commiter la mise à jour de la version de l'image Docker dans ce dépôt GitOps.
+## 🔄 Workflow Kustomize (Staging -> Prod)
+
+Les applications (comme l'exemple `mon-app`) utilisent **Kustomize** pour séparer les environnements :
+- Le pipeline CI (`ci-cd.yml`) met à jour automatiquement l'image dans l'overlay **Staging** (`gitops/apps/mon-app/overlays/staging`). ArgoCD déploie la nouvelle version en staging.
+- Une fois testé, vous pouvez aller dans l'onglet **Actions** de GitHub et déclencher manuellement le workflow **"Promote to Production"**. Il prendra le tag et mettra à jour l'overlay **Prod**, déclenchant le déploiement final.
+
+## 🔐 Gestion des Secrets Applicatifs (Vault + ESO)
+
+Pour injecter vos secrets sans les exposer dans Git :
+1. Les secrets doivent être créés dans Vault (Moteur KV v2 au chemin `secret/data/<env>/<app>`).
+2. Le `ClusterSecretStore` connecte l'**External Secrets Operator** (ESO) à Vault.
+3. Le manifest `ExternalSecret` présent dans l'application ira lire la clé dans Vault et créera un `Secret` Kubernetes local, monté dans votre conteneur.
+
+*Note: Pensez à exécuter le script `gitops/base/vault-init.sh` une fois Vault déployé pour configurer l'authentification Kubernetes initiale !*
+
+## 🌍 Routage Multi-Domaines
+
+Istio, Cert-Manager et ExternalDNS sont configurés pour être agnostiques vis-à-vis du domaine. Vous pouvez utiliser plusieurs domaines (ex: `*.example.com`, `*.domaine2.fr`) simplement en ajoutant les `hosts` appropriés dans les `VirtualService` et les `Certificate` ArgoCD créera les routes dynamiquement !
+
+---
 
 ## 💰 Optimisation des Coûts (Karpenter)
 Karpenter est configuré avec deux NodePools (dans `terraform/karpenter.tf`) :
