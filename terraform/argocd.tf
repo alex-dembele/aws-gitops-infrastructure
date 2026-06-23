@@ -15,8 +15,6 @@ resource "helm_release" "argocd" {
 }
 
 # Bootstrapping du "App of Apps" GitOps
-# Remarque : Idéalement le `repoURL` pointerait vers votre dépôt GitHub GitOps réel
-# Ici, nous mettons un placeholder pour l'architecture.
 resource "kubectl_manifest" "argocd_root_app" {
   yaml_body = <<-YAML
     apiVersion: argoproj.io/v1alpha1
@@ -29,7 +27,7 @@ resource "kubectl_manifest" "argocd_root_app" {
     spec:
       project: default
       source:
-        repoURL: 'https://github.com/alex-dembele/aws-gitops-infrastructure.git'
+        repoURL: 'https://github.com/alex-dembele/aws-gitops-apps.git'
         targetRevision: HEAD
         path: gitops/apps
       destination:

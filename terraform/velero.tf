@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "velero" {
-  bucket = "${var.cluster_name}-velero-backups-${data.aws_caller_identity.current.account_id}"
+  bucket = "${local.cluster_name}-velero-backups-${data.aws_caller_identity.current.account_id}"
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "velero" {
@@ -26,7 +26,7 @@ module "velero_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "~> 5.39"
 
-  role_name             = "${var.cluster_name}-velero"
+  role_name             = "${local.cluster_name}-velero"
   attach_velero_policy  = true
   velero_s3_bucket_arns = [aws_s3_bucket.velero.arn]
 

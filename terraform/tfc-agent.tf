@@ -6,7 +6,7 @@ variable "tfc_agent_token" {
 }
 
 resource "aws_security_group" "tfc_agent" {
-  name        = "${var.cluster_name}-tfc-agent-sg"
+  name        = "${local.cluster_name}-tfc-agent-sg"
   description = "Security group for TFC Agent"
   vpc_id      = module.vpc.vpc_id
 
@@ -20,7 +20,7 @@ resource "aws_security_group" "tfc_agent" {
   }
 
   tags = {
-    Name = "${var.cluster_name}-tfc-agent-sg"
+    Name = "${local.cluster_name}-tfc-agent-sg"
   }
 }
 
@@ -47,6 +47,6 @@ resource "aws_instance" "tfc_agent" {
               EOF
 
   tags = {
-    Name = "${var.cluster_name}-tfc-agent"
+    Name = "${local.cluster_name}-tfc-agent"
   }
 }

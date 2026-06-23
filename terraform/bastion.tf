@@ -1,5 +1,5 @@
 resource "aws_security_group" "bastion" {
-  name        = "${var.cluster_name}-bastion-sg"
+  name        = "${local.cluster_name}-bastion-sg"
   description = "Security group for bastion host and Wireguard"
   vpc_id      = module.vpc.vpc_id
 
@@ -27,7 +27,7 @@ resource "aws_security_group" "bastion" {
   }
 
   tags = {
-    Name = "${var.cluster_name}-bastion-sg"
+    Name = "${local.cluster_name}-bastion-sg"
   }
 }
 
@@ -68,7 +68,7 @@ resource "aws_instance" "bastion" {
               EOF
 
   tags = {
-    Name = "${var.cluster_name}-bastion"
+    Name = "${local.cluster_name}-bastion"
   }
 }
 

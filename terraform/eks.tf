@@ -2,7 +2,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
 
-  cluster_name    = var.cluster_name
+  cluster_name    = local.cluster_name
   cluster_version = var.cluster_version
 
   cluster_endpoint_public_access  = false
@@ -50,6 +50,6 @@ module "eks" {
 
   # Configuration des tags de sécurité requis par Karpenter
   node_security_group_tags = {
-    "karpenter.sh/discovery" = var.cluster_name
+    "karpenter.sh/discovery" = local.cluster_name
   }
 }

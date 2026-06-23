@@ -4,7 +4,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.8.1"
 
-  name = "${var.cluster_name}-vpc"
+  name = "${local.cluster_name}-vpc"
   cidr = var.vpc_cidr
 
   azs             = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -24,7 +24,7 @@ module "vpc" {
   private_subnet_tags = {
     "kubernetes.io/role/internal-elb" = 1
     # Tag pour que Karpenter découvre les subnets où provisionner les noeuds
-    "karpenter.sh/discovery" = var.cluster_name
+    "karpenter.sh/discovery" = local.cluster_name
   }
 
   tags = {

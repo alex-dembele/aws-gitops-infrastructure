@@ -4,12 +4,12 @@ resource "aws_kms_key" "vault" {
   enable_key_rotation     = true
 
   tags = {
-    Name = "${var.cluster_name}-vault-kms"
+    Name = "${local.cluster_name}-vault-kms"
   }
 }
 
 resource "aws_kms_alias" "vault" {
-  name          = "alias/${var.cluster_name}-vault-auto-unseal"
+  name          = "alias/${local.cluster_name}-vault-auto-unseal"
   target_key_id = aws_kms_key.vault.key_id
 }
 
@@ -17,7 +17,7 @@ module "vault_kms_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "~> 5.39"
 
-  role_name = "${var.cluster_name}-vault-kms"
+  role_name = "${local.cluster_name}-vault-kms"
 
   role_policy_arns = {
     vault_kms = aws_iam_policy.vault_kms.arn
@@ -32,7 +32,7 @@ module "vault_kms_irsa" {
 }
 
 resource "aws_iam_policy" "vault_kms" {
-  name        = "${var.cluster_name}-vault-kms-policy"
+  name        = "${local.cluster_name}-vault-kms-policy"
   description = "Policy for Vault KMS Auto-Unseal"
 
   policy = jsonencode({
