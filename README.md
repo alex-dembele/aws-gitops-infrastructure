@@ -106,3 +106,6 @@ Karpenter est configurÃ© avec deux NodePools (dans `terraform/karpenter.tf`) :
 5. **Sauvegardes (Velero)** : Un bucket S3 dédié et un rôle IRSA permettent à Velero de sauvegarder votre cluster (manifestes et volumes EBS).
 6. **Gouvernance (Kyverno)** : Le moteur de politiques Kyverno est déployé pour s_assurer que seuls les conteneurs sécurisés tournent sur votre infrastructure.
 
+
+## ?? Applications et Gouvernance
+Pour la documentation sur l'ajout d'applications, les stratégies de déploiement (Argo Rollouts, Image Updater), ainsi que la **gouvernance GitHub** (Protections de branche et PR reviews), veuillez consulter le README du dépôt d'applications : [aws-gitops-apps](https://github.com/alex-dembele/aws-gitops-apps).
