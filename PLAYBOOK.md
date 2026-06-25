@@ -96,4 +96,40 @@ velero restore create --from-backup pre-upgrade-eks-129
 ```
 
 ---
+
+## 5. 🤖 Terraform Cloud (TFC) et Automatisation CI/CD
+
+L'infrastructure est connectée à **Terraform Cloud** de manière native. Il est inutile (et déconseillé pour éviter les conflits de locks d'état) d'utiliser d'autres outils d'automatisation Terraform comme Atlantis.
+
+**Workflow VCS-Driven natif :**
+1. Un développeur ou SRE modifie un fichier Terraform sur une nouvelle branche et crée une **Pull Request** sur GitHub.
+2. Terraform Cloud (via son intégration GitHub App) intercepte la PR. 
+3. TFC exécute un `terraform plan` de manière isolée et sécurisée.
+4. TFC commente **directement dans la Pull Request GitHub** avec les résultats spéculatifs du *Plan*.
+5. Si tous les tests (Tfsec) passent et que la PR est approuvée puis **Mergée** sur `main`, Terraform Cloud exécute automatiquement le `terraform apply`.
+
+> [!TIP]
+> **Vérification d'activation** : Assurez-vous d'avoir lié votre espace de travail TFC à votre repo GitHub via *Settings > Version Control*, et cochez "Automatic speculative plans".
+
+---
+
+## 6. 🔄 Procédure de mise à jour d'EKS (Upgrades)
+
+EKS déprécie rapidement les anciennes versions de Kubernetes. Pour mettre à jour l'environnement sans interruption, nous utilisons une approche progressive.
+
+**Règle d'or :** L'Upgrade ne doit JAMAIS être effectué en production sans avoir été testé sur l'environnement de *Staging*.
+
+### Procédure étape par étape :
+
+1. **Pré-requis** : Vérifier sur les Release Notes d'AWS EKS que les APIs dépréciées ont été supprimées de vos manifestes applicatifs.
+2. **Upgrade du Control Plane** : Modifiez `terraform/eks.tf` (ou passez une variable) pour indiquer la nouvelle version (ex: `cluster_version = "1.30"`). Exécutez le `terraform plan` et `apply` (ou laissez TFC le faire).
+3. **Mise à jour des Nœuds via Karpenter (Blue/Green NodePool)** :
+   Plutôt que de faire un recyclage in-place dangereux, créez un nouveau NodePool/EC2NodeClass dédié à la nouvelle version :
+   - Dupliquez les CRDs Karpenter actuelles dans `terraform/karpenter.tf` en changeant leurs noms (ex: `prod-ondemand-130`).
+   - Appliquez ce changement. Le cluster possède maintenant 2 NodePools.
+4. **Cordon de l'Acien NodePool** : Taint/Cordonnez l'ancien NodePool Karpenter (ex: `prod-ondemand`) afin que plus aucun pod ne puisse s'y créer.
+5. **Draining (Eviction)** : Supprimez les CRDs de l'ancien NodePool via `kubectl delete nodepool prod-ondemand`. Karpenter va **automatiquement** drainer gracieusement l'ancien NodePool, les pods seront recréés, ce qui forcera Karpenter à demander de nouvelles instances basées sur le *nouveau* NodePool (`prod-ondemand-130`).
+6. **Validation** : Vérifiez que tous les noeuds en service exploitent la bonne version de la kubelet.
+
+---
 *Fin du document d'infrastructure.*
